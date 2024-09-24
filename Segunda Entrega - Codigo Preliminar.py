@@ -6,16 +6,29 @@ class Generador:
     def __init__(self, contenido_inicial):
         self.contenidoInicial = contenido_inicial
         
-    @abstractmethod   
-    def generar(apartir_de):
+    # @abstractmethod   
+    # def generar(apartir_de):
+    #     pass
+
+    @abstractmethod
+    def generar(self, apartir_de):
         pass
+
+
+
+# class GeneradorTexto(Generador): #objeto de la clase generador
+#     def __init__ (self):
+#         pass
+#     def generar(self, apartir_de):
+        
+#         texto_generado = "Hola, esto es un texto generado"
+#         return texto_generado
 
 
 class GeneradorTexto(Generador): #objeto de la clase generador
-    def __init__ (self):
-        pass
+    def __init__(self, contenido_inicial=""): 
+        super().__init__(contenido_inicial)
     def generar(self, apartir_de):
-        
         texto_generado = "Hola, esto es un texto generado"
         return texto_generado
 
@@ -32,13 +45,22 @@ class FrAI(Frame):
         self.generador = GeneradorTexto()
         
 
-    def fEnviar(self):
+    # def fEnviar(self):
          
-        n1 = self.txtNum1.get("1.0", "end-1c")
+    #     n1 = self.txtNum1.get("1.0", "end-1c")
+    #     self.txtNum1.delete("1.0", "end")
+    #     self.txtNum3.delete("1.0", "end")  
+    #     self.txtNum3.insert("1.0", f" aando descalza, por las calles soleadas de mi música\n soltando pájaros blancos de mis manos\n besando las pupilas negras de soles amarillos\n ando descalza, sobre pasto tierno y acordes azulados")
+ 
+    def fEnviar(self):
+        n1 = self.txtNum1.get("1.0", "end-1c")  # Obtiene el texto del input
         self.txtNum1.delete("1.0", "end")
         self.txtNum3.delete("1.0", "end")  
-        self.txtNum3.insert("1.0", f" aando descalza, por las calles soleadas de mi música\n soltando pájaros blancos de mis manos\n besando las pupilas negras de soles amarillos\n ando descalza, sobre pasto tierno y acordes azulados")
- 
+        resultado = self.generador.generar(n1)  # Genera texto basado en el input
+        self.txtNum3.insert("1.0", resultado)  # Inserta el resultado en el Text de salida
+
+
+
 
     def create_widgets(self):
 
