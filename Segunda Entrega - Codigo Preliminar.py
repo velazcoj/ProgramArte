@@ -51,7 +51,7 @@ class FrameMenuPrincipal(Frame):
     #     self.txtNum3.delete("1.0", "end")  
     #     self.txtNum3.insert("1.0", f" aando descalza, por las calles soleadas de mi música\n soltando pájaros blancos de mis manos\n besando las pupilas negras de soles amarillos\n ando descalza, sobre pasto tierno y acordes azulados")
  
-    def enviar(self):
+    def solicitarTexto(self):
         textoingresado = self.txtNum1.get("1.0", "end-1c")  # Obtiene el texto del input
         self.txtNum1.delete("1.0", "end")
         self.txtNum3.delete("1.0", "end")  
@@ -70,7 +70,7 @@ class FrameMenuPrincipal(Frame):
         self.lblNum1 = Label(self,text="Escribe Algo: ",bg="white")
         self.txtNum1=Text(self,bg="white", height=1)
         
-        self.btn1=Button(self,text="Enviar", command=self.enviar)
+        self.btn1=Button(self,text="Enviar", command=self.solicitarTexto)
 
         self.lblNum3 = Label(self,text="IA dice:",bg="yellow")
         self.txtNum3=Text(self,bg="cyan")
