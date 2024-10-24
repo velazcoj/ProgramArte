@@ -78,34 +78,39 @@ class aPIdeappcreadoradetextos():
     def generarnuevotexto(self, contenidoinicial):
         return self.realizarsolicitud(contenidoinicial)
         
-    def realizarsolicitud(self,contenidoinicial):
+    def realizarsolicitud(self, contenidoinicial):
         url = "https://www.learnitive.com/api/v1/contents"
         headers = {
             "content-type": "application/json",
             "Accept": "application/json",
-            "api-key": ""  
+            "api-key": "lzdXeMv24j"  # Asegúrate de usar tu clave API
         }
-
         data = {
-            "input": contenidoinicial,
-            "model": "balanced",
-            "keywords": [],
-            "max_tokens": "100",
-            "temperature": "0.65"
+            "input": contenidoinicial,   # El texto que quieres convertir
+            "model": "balanced",         # Modelo según el ejemplo de la API
+            "keywords": [],  # Puedes cambiar estas palabras clave si es necesario
+            "max_tokens": 50,           # Número de tokens como número entero
+            "temperature": 0.65,          # El nivel de aleatoriedad, como número flotante
+            "target_lang":"es"
         }
-
+        
+        # Realizar la solicitud POST a la API
         response = requests.post(url, json=data, headers=headers)
 
         # Verifica si la solicitud fue exitosa
         if response.status_code == 200:
             result = response.json()
-            texto = result['message'][0]['text']
-            print(texto)
-            print(type(texto))
-            return texto
+            print(result)  # Verifica qué devuelve la API
+            if isinstance(result, dict) and 'message' in result:
+                texto = result['message'][0]['text']
+                return texto
+            else:
+                print(f"Estructura inesperada en la respuesta: {result}")
+                return "Error: La respuesta no tiene el formato esperado."
         else:
             print(f"Error en la solicitud (código {response.status_code}):")
             print(response.text)
+            return "Error: No se pudo completar la solicitud."
                 
 
 
@@ -121,28 +126,33 @@ class Interfaz(Frame):
         self.master.bind('<Configure>', self.update_image_position)
 
     def EnviarSolicitudTexto(self):
+        # Generar el texto utilizando el generador
         n1 = self.generadortexto.generar(self.inputPrompt.get("1.0", "end-1c"))
-        
         print(n1)
         print(type(n1))
+
         if isinstance(n1, str):
-        # Inserta el texto en el widget de texto
-            print(type(n1))
+            # El texto generado es válido, así que inicializa la posición actual
+            self.posicion_actual = 0  # Inicializamos la variable de posición
+            
+            # Inserta el texto en el widget de texto
             self.output.delete("1.0", "end")
-            self.output.insert("1.0", n1)
+            self.texto_a_mostrar = n1  # Guardamos el texto a mostrar
+
+            # Inicia el proceso de escritura del texto
+            self.escribir_texto()
+
+            # Borrar el contenido del input después de procesar
             self.inputPrompt.delete("1.0", "end")
         else:
             print("Error: El resultado no es una cadena de texto válida.")
-            
-            
-    #     self.escribir_texto()
 
-    # def escribir_texto(self):
-
-    #     if self.posicion_actual < len(self.texto_a_mostrar):
-    #         self.output.insert("end", self.texto_a_mostrar[self.posicion_actual])
-    #         self.posicion_actual += 1
-    #         self.after(100, self.escribir_texto)
+    def escribir_texto(self):
+        # Método para escribir el texto de manera secuencial con efecto de escritura
+        if self.posicion_actual < len(self.texto_a_mostrar):
+            self.output.insert("end", self.texto_a_mostrar[self.posicion_actual])
+            self.posicion_actual += 1
+            self.after(100, self.escribir_texto) 
     
     def enviarSolicitudImagen(self):
         textodesolicitud = self.inputPrompt.get("1.0", "end-1c")
@@ -184,7 +194,7 @@ class Interfaz(Frame):
         
         #botones
         self.botonTexto=Button(self,text="Obtener texto", 
-                                    command=self.enviarSolicitudImagen, 
+                                    command=self.EnviarSolicitudTexto, 
                                     cursor="hand2", 
                                     font=("Segoe UI", 16),
                                     activebackground="#924019",
@@ -223,3 +233,5 @@ root.wm_title("ProgramArte")
 root.configure(bg="#ffebc2")
 app = Interfaz(root) 
 app.mainloop()
+
+
