@@ -61,14 +61,18 @@ class aPIdeappcreadoradeimagenes():
         else:
             answer.image.save("output.jpg")
 
+        #cargamos la imagen
+        self.cargarimagen()
+
+    def cargarimagen(self):
         # Carga la imagen generada
         image_path = "output.jpg"
         image = Image.open(image_path)
 
-        # Muestra la imagen en un marco
         plt.imshow(image)
         plt.axis("off")
         plt.show()
+        
 
 
 class aPIdeappcreadoradetextos():
@@ -83,24 +87,24 @@ class aPIdeappcreadoradetextos():
         headers = {
             "content-type": "application/json",
             "Accept": "application/json",
-            "api-key": "lzdXeMv24j"  # Asegúrate de usar tu clave API
+            "api-key": "h54PB4IYPg"  # clave API puede estar oculta (deberia estarlo en una real)
         }
         data = {
-            "input": contenidoinicial,   # El texto que quieres convertir
-            "model": "balanced",         # Modelo según el ejemplo de la API
-            "keywords": [],  # Puedes cambiar estas palabras clave si es necesario
-            "max_tokens": 50,           # Número de tokens como número entero
-            "temperature": 0.65,          # El nivel de aleatoriedad, como número flotante
+            "input": contenidoinicial,   # El texto de solicitud que hay que enviar a la api
+            "model": "balanced",         
+            "keywords": [],   
+            "max_tokens": 100,           
+            "temperature": 0.65,          
             "target_lang":"es"
         }
         
-        # Realizar la solicitud POST a la API
+        
         response = requests.post(url, json=data, headers=headers)
 
         # Verifica si la solicitud fue exitosa
         if response.status_code == 200:
             result = response.json()
-            print(result)  # Verifica qué devuelve la API
+            print(result)  # Verificacion
             if isinstance(result, dict) and 'message' in result:
                 texto = result['message'][0]['text']
                 return texto
@@ -124,46 +128,62 @@ class Interfaz(Frame):
         self.generadortexto = GeneradorTexto()
         self.generadorimagen = GeneradorImagen()
         self.master.bind('<Configure>', self.update_image_position)
+        self.texto = ""
 
     def EnviarSolicitudTexto(self):
+        
         # Generar el texto utilizando el generador
-        n1 = self.generadortexto.generar(self.inputPrompt.get("1.0", "end-1c"))
-        print(n1)
-        print(type(n1))
+        textoGeneradoporlaAPIdetexto = self.generadortexto.generar(self.inputPrompt.get("1.0", "end-1c"))
+        print(textoGeneradoporlaAPIdetexto)
+        print(type(textoGeneradoporlaAPIdetexto))
 
-        if isinstance(n1, str):
-            # El texto generado es válido, así que inicializa la posición actual
-            self.posicion_actual = 0  # Inicializamos la variable de posición
+        # El texto generado es válido?, metodo que valida eso
+        if isinstance(textoGeneradoporlaAPIdetexto, str):
             
-            # Inserta el texto en el widget de texto
+            
+            self.posicion_actual = 0  # Inicializamos una recursividad para el efecto en el output
+
+            # borra el texto en el output si es que hay uno.
             self.output.delete("1.0", "end")
-            self.texto_a_mostrar = n1  # Guardamos el texto a mostrar
+            
 
             # Inicia el proceso de escritura del texto
-            self.escribir_texto()
+            self.texto = textoGeneradoporlaAPIdetexto
+            self.escribir_texto(textoGeneradoporlaAPIdetexto)
 
-            # Borrar el contenido del input después de procesar
-            self.inputPrompt.delete("1.0", "end")
+            
         else:
             print("Error: El resultado no es una cadena de texto válida.")
+            
+        # Borra el contenido del input después de procesar    
+        self.inputPrompt.delete("1.0", "end")
 
-    def escribir_texto(self):
-        # Método para escribir el texto de manera secuencial con efecto de escritura
-        if self.posicion_actual < len(self.texto_a_mostrar):
-            self.output.insert("end", self.texto_a_mostrar[self.posicion_actual])
+    # Escribir el texto de manera secuencial con efecto de escritura usando recursividad
+    def escribir_texto(self, texto_a_mostrar):
+        if self.posicion_actual < len(texto_a_mostrar):
+            self.output.insert("end", texto_a_mostrar[self.posicion_actual])
             self.posicion_actual += 1
-            self.after(100, self.escribir_texto) 
-    
+            self.after(100, lambda: self.escribir_texto(texto_a_mostrar))
+        else:
+            # Al finalizar la escritura, llama a enviarSolicitudImagen2
+            
+            self.posicion_actual = 0
+
     def enviarSolicitudImagen(self):
         textodesolicitud = self.inputPrompt.get("1.0", "end-1c")
-        self.inputPrompt.delete("1.0", "end")
         self.generadorimagen.generar(textodesolicitud)
+        self.inputPrompt.delete("1.0", "end")
         
+
+    
+
     def enviarSolicitudImagenyTexto(self):
-        pass
+        self.EnviarSolicitudTexto()
+        print(self.output.get("1.0", "end-1c").strip())
+        self.generadorimagen.generar(self.texto)
         
-
-
+        
+        
     def create_widgets(self):
 
         # Cargar la imagen en memoria
@@ -173,7 +193,7 @@ class Interfaz(Frame):
 
         # Label con la imagen principal
         self.titulo = Label(self, image=self.photo, bg="#ffebc2", borderwidth=0)
-        self.titulo.place(anchor="center")  # Usamos anchor="center" para centrar
+        self.titulo.place(anchor="center")
         
         # Etiqueta del prompt y prompt
         self.etiquetaPrompt = Label(self,text="Covierte tu texto a poesía:", fg="black", bg="#ffebc2", height=2, font=("Segoe UI", 16, "bold"), relief="raised", borderwidth=0.5)
@@ -233,5 +253,3 @@ root.wm_title("ProgramArte")
 root.configure(bg="#ffebc2")
 app = Interfaz(root) 
 app.mainloop()
-
-
