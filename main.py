@@ -6,7 +6,7 @@ import fireworks.client
 from fireworks.client.image import ImageInference, Answer
 import matplotlib.pyplot as plt
 from PIL import Image
-
+ 
 class Generador:
     def __init__(self, contenido_inicial):
         self.contenidoInicial = contenido_inicial
